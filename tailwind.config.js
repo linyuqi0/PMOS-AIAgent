@@ -51,25 +51,31 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Morandi palette
-        morandi: {
-          sage: '#A8B5A0',
-          dust: '#C4B7A6',
-          rose: '#D4A5A5',
-          lavender: '#B8B8D1',
-          sky: '#A6C0D4',
-          sand: '#D9C9B0',
-          clay: '#B89F8E',
-          moss: '#7D8B6F',
-          slate: '#8B9DAE',
-          cream: '#F5F1EB',
-          charcoal: '#4A4A4A',
+        // Editorial ink palette
+        ink: {
+          forest: '#2D3A2E',
+          moss: '#3F5237',
+          sage: '#7A8B6F',
+          sand: '#C9B79C',
+          cream: '#F5EFE3',
+          paper: '#FAF6EC',
+          rust: '#A6553B',
+          oxblood: '#6B2C2C',
+          gold: '#B8924D',
+          charcoal: '#1A1A1A',
+          ash: '#3D3D3D',
         }
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        serif: ['var(--font-fraunces)', '"Fraunces"', '"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['var(--font-plex-sans)', '"IBM Plex Sans"', '"Inter"', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-jetbrains)', '"JetBrains Mono"', '"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        display: ['var(--font-fraunces)', '"Fraunces"', '"Playfair Display"', 'Georgia', 'serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -80,23 +86,35 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          from: { opacity: "0", transform: "translateY(4px)" },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(12px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
         "slide-in": {
           from: { opacity: "0", transform: "translateX(-12px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "marquee": {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "slide-in": "slide-in 0.2s ease-out",
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        "fade-up": "fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "fade-in": "fade-in 0.5s ease-out both",
+        "slide-in": "slide-in 0.3s ease-out",
+        "shimmer": "shimmer 3s linear infinite",
+        "marquee": "marquee 40s linear infinite",
       },
     },
   },

@@ -109,7 +109,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <AppLayout title="设置">
+    <AppLayout title="设置" subtitle="§ S — The Preferences of the Editor">
       <div className="max-w-3xl mx-auto space-y-6">
         <Card>
           <CardHeader>

@@ -162,7 +162,7 @@ export default function AnalyzerPage() {
   ];
 
   return (
-    <AppLayout title="需求分析器">
+    <AppLayout title="需求分析器" subtitle="§ 04 — Five Lenses on Every Requirement">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">

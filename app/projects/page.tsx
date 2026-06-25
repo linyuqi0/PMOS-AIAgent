@@ -153,7 +153,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <AppLayout title="项目中心">
+    <AppLayout title="项目中心" subtitle="§ 02 — The Registry of Products">
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-md">
