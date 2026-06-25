@@ -177,7 +177,7 @@ export default function KnowledgePage() {
 
   return (
     <AppLayout title="知识库" description="多格式文档管理，全文检索">
-      <div className="flex h-[calc(100vh-8rem)] gap-6">
+      <div className="flex sticky top-6 h-[calc(100vh-7rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">

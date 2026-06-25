@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { PWARegister } from "@/components/pwa-register";
+import { AppInitializer } from "@/components/app-initializer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
+            <AppInitializer />
             <PWARegister />
             {children}
           </ToastProvider>

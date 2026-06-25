@@ -18,6 +18,9 @@ import {
   Sparkles,
   X,
   ChevronRight,
+  ChevronDown,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -57,6 +60,9 @@ export default function PRDPage() {
   const [selectedPrd, setSelectedPrd] = React.useState<PRD | null>(null);
   const [isEditing, setIsEditing] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("edit");
+  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(
+    new Set(["background", "goals"])
+  );
   const [formData, setFormData] = React.useState<Partial<PRD>>({
     title: "",
     description: "",
@@ -257,9 +263,33 @@ ${html}
     return marked.parse(md) as string;
   }, [formData]);
 
+  const completedCount = React.useMemo(() => {
+    return prdSections.filter(
+      (s) => (formData[s.key as keyof PRD] as string | undefined)?.trim().length
+    ).length;
+  }, [formData]);
+
+  const progressPercent = Math.round((completedCount / prdSections.length) * 100);
+
+  const toggleSection = (key: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const isSectionComplete = (key: string) => {
+    return !!(formData[key as keyof PRD] as string | undefined)?.trim().length;
+  };
+
   return (
     <AppLayout title="PRD 生成器" description="9大模块一键生成标准PRD文档">
-      <div className="flex h-[calc(100vh-8rem)] gap-6">
+      <div className="flex sticky top-6 h-[calc(100vh-7rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -380,15 +410,36 @@ ${html}
               </div>
 
               {isEditing && (
-                <div className="mb-4">
-                  <Label>需求描述</Label>
-                  <Textarea
-                    value={formData.description || ""}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="简要描述需求内容..."
-                    className="mt-1"
-                    rows={2}
-                  />
+                <div className="mb-4 space-y-3">
+                  <div>
+                    <Label>需求描述</Label>
+                    <Textarea
+                      value={formData.description || ""}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="简要描述需求内容..."
+                      className="mt-1"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-card/50 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm font-medium text-foreground">完成进度</div>
+                      <div className="text-xs text-muted-foreground">
+                        {completedCount} / {prdSections.length} 个模块
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-40 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                      <div className="text-sm font-semibold text-primary tabular-nums">
+                        {progressPercent}%
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -400,21 +451,54 @@ ${html}
 
                 <TabsContent value="edit" className="flex-1 mt-4 overflow-hidden">
                   <ScrollArea className="h-full pr-4 -mr-4">
-                    <div className="space-y-6 pb-8">
-                      {prdSections.map((section) => (
-                        <div key={section.key}>
-                          <Label className="text-sm font-medium">{section.label}</Label>
-                          <Textarea
-                            value={(formData as any)[section.key] || ""}
-                            onChange={(e) =>
-                              setFormData({ ...formData, [section.key]: e.target.value })
-                            }
-                            placeholder={`输入${section.label}内容...`}
-                            className="mt-2 font-mono text-sm"
-                            rows={6}
-                          />
-                        </div>
-                      ))}
+                    <div className="space-y-3 pb-8">
+                      {prdSections.map((section, index) => {
+                        const isOpen = expandedSections.has(section.key);
+                        const complete = isSectionComplete(section.key);
+                        return (
+                          <div
+                            key={section.key}
+                            className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => toggleSection(section.key)}
+                              className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-muted/50"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+                                  {index + 1}
+                                </div>
+                                <span className="font-medium text-foreground">
+                                  {section.label}
+                                </span>
+                                {complete ? (
+                                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                ) : (
+                                  <Circle className="h-4 w-4 text-muted-foreground/40" />
+                                )}
+                              </div>
+                              {isOpen ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </button>
+                            {isOpen && (
+                              <div className="border-t border-border px-5 py-4">
+                                <Textarea
+                                  value={(formData as any)[section.key] || ""}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, [section.key]: e.target.value })
+                                  }
+                                  placeholder={`输入${section.label}内容...`}
+                                  className="font-mono text-sm min-h-[180px]"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </ScrollArea>
                 </TabsContent>
