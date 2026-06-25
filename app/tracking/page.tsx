@@ -202,7 +202,7 @@ export default function TrackingPage() {
   };
 
   return (
-    <AppLayout title="埋点设计器" description="§ 06 — Events, Properties, A Dictionary">
+    <AppLayout title="埋点设计器" description="事件属性管理，自动生成埋点文档">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">

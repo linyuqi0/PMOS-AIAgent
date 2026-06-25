@@ -335,7 +335,7 @@ LIMIT 100;`;
   };
 
   return (
-    <AppLayout title="SQL 助手" description="§ 05 — Dialects, Templates, Queries">
+    <AppLayout title="SQL 助手" description="多方言支持，常用模板一键套用">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">

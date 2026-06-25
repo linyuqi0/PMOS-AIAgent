@@ -154,15 +154,15 @@ export default function AnalyzerPage() {
   };
 
   const analysisItems = [
-    { key: "breakdown", label: "需求拆解", icon: ListChecks, color: "text-morandi-sage" },
-    { key: "riskAnalysis", label: "风险分析", icon: AlertTriangle, color: "text-morandi-rose" },
-    { key: "devEstimate", label: "开发评估", icon: Code, color: "text-morandi-lavender" },
-    { key: "testEstimate", label: "测试评估", icon: Bug, color: "text-morandi-sky" },
-    { key: "launchRisk", label: "上线风险", icon: Rocket, color: "text-morandi-clay" },
+    { key: "breakdown", label: "需求拆解", icon: ListChecks, color: "text-emerald-600" },
+    { key: "riskAnalysis", label: "风险分析", icon: AlertTriangle, color: "text-rose-600" },
+    { key: "devEstimate", label: "开发评估", icon: Code, color: "text-violet-600" },
+    { key: "testEstimate", label: "测试评估", icon: Bug, color: "text-blue-600" },
+    { key: "launchRisk", label: "上线风险", icon: Rocket, color: "text-orange-600" },
   ];
 
   return (
-    <AppLayout title="需求分析器" description="§ 04 — Five Lenses on Every Requirement">
+    <AppLayout title="需求分析器" description="多维度分析需求风险与可行性">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">

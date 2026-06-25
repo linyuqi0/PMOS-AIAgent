@@ -192,7 +192,7 @@ export default function PromptsPage() {
   };
 
   return (
-    <AppLayout title="Prompt 库" description="§ 09 — A Library of Instructions">
+    <AppLayout title="Prompt 库" description="9大分类内置模板，一键复制">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-64 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">
