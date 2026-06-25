@@ -3,27 +3,21 @@
 import * as React from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
-import { useAppStore } from "@/store/app";
 
 interface AppLayoutProps {
   children: React.ReactNode;
   title?: string;
-  subtitle?: string;
-  date?: string;
+  description?: string;
+  actions?: React.ReactNode;
 }
 
-export function AppLayout({ children, title, subtitle, date }: AppLayoutProps) {
-  const { sidebarCollapsed } = useAppStore();
-
+export function AppLayout({ children, title, description, actions }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-ink-paper text-ink-charcoal">
+    <div className="min-h-screen bg-background">
       <Sidebar />
-      <div
-        className="transition-all duration-500"
-        style={{ marginLeft: sidebarCollapsed ? 80 : 288 }}
-      >
-        <Header title={title} subtitle={subtitle} date={date} />
-        <main className="relative">{children}</main>
+      <div className="ml-64">
+        <Header title={title} description={description} actions={actions} />
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );

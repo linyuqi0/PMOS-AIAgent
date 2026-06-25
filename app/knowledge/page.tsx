@@ -176,7 +176,7 @@ export default function KnowledgePage() {
   };
 
   return (
-    <AppLayout title="知识库" subtitle="§ 08 — The Archive of Knowledge">
+    <AppLayout title="知识库" description="§ 08 — The Archive of Knowledge">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="space-y-3">

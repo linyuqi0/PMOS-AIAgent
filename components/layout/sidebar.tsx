@@ -14,212 +14,199 @@ import {
   BookOpen,
   Sparkles,
   Settings,
-  ChevronLeft,
+  ChevronDown,
   ChevronRight,
-  Compass,
+  Rocket,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAppStore } from "@/store/app";
 
 interface NavItem {
   title: string;
   href: string;
-  no: string;
   icon: React.ReactNode;
+  badge?: string;
 }
 
-const navItems: NavItem[] = [
-  { title: "工作台", no: "01", href: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { title: "项目中心", no: "02", href: "/projects", icon: <FolderKanban className="h-4 w-4" /> },
-  { title: "PRD 生成器", no: "03", href: "/prd", icon: <FileText className="h-4 w-4" /> },
-  { title: "需求分析器", no: "04", href: "/analyzer", icon: <BarChart3 className="h-4 w-4" /> },
-  { title: "SQL 助手", no: "05", href: "/sql", icon: <Database className="h-4 w-4" /> },
-  { title: "埋点设计器", no: "06", href: "/tracking", icon: <Target className="h-4 w-4" /> },
-  { title: "测试用例", no: "07", href: "/test-cases", icon: <TestTube className="h-4 w-4" /> },
-  { title: "知识库", no: "08", href: "/knowledge", icon: <BookOpen className="h-4 w-4" /> },
-  { title: "Prompt 库", no: "09", href: "/prompts", icon: <Sparkles className="h-4 w-4" /> },
-];
+interface NavGroup {
+  title: string;
+  icon: React.ReactNode;
+  items: NavItem[];
+}
 
-const bottomNavItems: NavItem[] = [
-  { title: "设置", no: "S", href: "/settings", icon: <Settings className="h-4 w-4" /> },
+const navGroups: NavGroup[] = [
+  {
+    title: "工作台",
+    icon: <Briefcase className="h-4 w-4" />,
+    items: [
+      { title: "工作台总览", href: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+      { title: "项目中心", href: "/projects", icon: <FolderKanban className="h-4 w-4" />, badge: "3" },
+    ],
+  },
+  {
+    title: "产品设计",
+    icon: <FileText className="h-4 w-4" />,
+    items: [
+      { title: "PRD 生成器", href: "/prd", icon: <FileText className="h-4 w-4" /> },
+      { title: "需求分析器", href: "/analyzer", icon: <BarChart3 className="h-4 w-4" /> },
+      { title: "埋点设计器", href: "/tracking", icon: <Target className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "质量保障",
+    icon: <TestTube className="h-4 w-4" />,
+    items: [
+      { title: "测试用例", href: "/test-cases", icon: <TestTube className="h-4 w-4" /> },
+      { title: "SQL 助手", href: "/sql", icon: <Database className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "知识资产",
+    icon: <BookOpen className="h-4 w-4" />,
+    items: [
+      { title: "知识库", href: "/knowledge", icon: <BookOpen className="h-4 w-4" /> },
+      { title: "Prompt 库", href: "/prompts", icon: <Sparkles className="h-4 w-4" />, badge: "NEW" },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { sidebarCollapsed, toggleSidebar } = useAppStore();
+  const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(
+    new Set(["工作台", "产品设计", "质量保障", "知识资产"])
+  );
+
+  const toggleGroup = (title: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) {
+        next.delete(title);
+      } else {
+        next.add(title);
+      }
+      return next;
+    });
+  };
+
+  React.useEffect(() => {
+    const activeGroup = navGroups.find((g) =>
+      g.items.some((item) => pathname === item.href || pathname.startsWith(item.href + "/"))
+    );
+    if (activeGroup && !expandedGroups.has(activeGroup.title)) {
+      setExpandedGroups((prev) => new Set(prev).add(activeGroup.title));
+    }
+  }, [pathname, expandedGroups]);
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-ink-charcoal/15 bg-ink-cream/95 backdrop-blur-sm transition-all duration-500",
-        sidebarCollapsed ? "w-20" : "w-72"
-      )}
-    >
-      {/* Masthead */}
-      <div className="relative border-b border-ink-charcoal/15 px-5 py-5">
-        <div className="flex items-start justify-between gap-2">
-          {!sidebarCollapsed ? (
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Compass className="h-4 w-4 text-ink-forest" strokeWidth={1.5} />
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-ash">
-                  Est. 2026
-                </span>
-              </div>
-              <h1 className="mt-2 font-display text-2xl font-medium leading-none text-ink-charcoal">
-                PMOS<span className="text-ink-forest">.</span>Lite
-              </h1>
-              <p className="mt-2 font-serif text-[11px] italic leading-tight text-ink-ash">
-                《产品经理工坊》<br />本地化 · 离线 · 免费
-              </p>
-            </div>
-          ) : (
-            <div className="flex w-full justify-center">
-              <div className="flex h-10 w-10 items-center justify-center border border-ink-charcoal/30">
-                <Compass className="h-4 w-4 text-ink-forest" strokeWidth={1.5} />
-              </div>
-            </div>
-          )}
-          {!sidebarCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="h-7 w-7 -mr-2 text-ink-ash hover:bg-ink-forest/10 hover:text-ink-forest"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          )}
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar">
+      {/* Logo */}
+      <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm">
+          <Rocket className="h-5 w-5" />
         </div>
-        {sidebarCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border border-ink-charcoal/15 bg-ink-cream text-ink-ash hover:bg-ink-forest hover:text-ink-cream"
-          >
-            <ChevronRight className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-
-      {/* Nav sections */}
-      <ScrollArea className="h-[calc(100vh-9rem)]">
-        <div className="px-3 py-6">
-          {!sidebarCollapsed && (
-            <div className="mb-3 flex items-center gap-2 px-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-ash">
-                § 目录
-              </span>
-              <span className="h-px flex-1 bg-ink-charcoal/15" />
-            </div>
-          )}
-          <nav className="space-y-0.5">
-            {navItems.map((item, i) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "group relative flex items-center gap-3 px-3 py-2.5 text-sm transition-all",
-                    sidebarCollapsed && "justify-center",
-                    isActive
-                      ? "bg-ink-forest text-ink-cream"
-                      : "text-ink-ash hover:text-ink-charcoal"
-                  )}
-                >
-                  {!sidebarCollapsed && (
-                    <span
-                      className={cn(
-                        "font-mono text-[10px] tracking-widest",
-                        isActive ? "text-ink-cream/70" : "text-ink-ash/60"
-                      )}
-                    >
-                      {item.no}
-                    </span>
-                  )}
-                  <span
-                    className={cn(
-                      "shrink-0 transition-transform group-hover:scale-110",
-                      isActive ? "text-ink-cream" : "text-ink-forest"
-                    )}
-                  >
-                    {item.icon}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <span className="flex-1 font-sans font-medium">
-                      {item.title}
-                    </span>
-                  )}
-                  {isActive && !sidebarCollapsed && (
-                    <span className="font-mono text-xs text-ink-cream/70">●</span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Bottom section */}
-        <div className="border-t border-ink-charcoal/15 px-3 py-4">
-          {!sidebarCollapsed && (
-            <div className="mb-3 flex items-center gap-2 px-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-ash">
-                § 系统
-              </span>
-              <span className="h-px flex-1 bg-ink-charcoal/15" />
-            </div>
-          )}
-          <nav className="space-y-0.5">
-            {bottomNavItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "group flex items-center gap-3 px-3 py-2.5 text-sm transition-all",
-                    sidebarCollapsed && "justify-center",
-                    isActive
-                      ? "bg-ink-forest text-ink-cream"
-                      : "text-ink-ash hover:text-ink-charcoal"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "shrink-0",
-                      isActive ? "text-ink-cream" : "text-ink-forest"
-                    )}
-                  >
-                    {item.icon}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <span className="font-sans font-medium">{item.title}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </ScrollArea>
-
-      {/* Footer mark */}
-      {!sidebarCollapsed && (
-        <div className="absolute bottom-0 left-0 right-0 border-t border-ink-charcoal/15 px-5 py-3">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-ink-ash">
-              No.001
-            </span>
-            <span className="font-serif text-[10px] italic text-ink-ash">
-              Local First
-            </span>
+        <div>
+          <div className="text-base font-semibold tracking-tight text-foreground">
+            PMOS Lite
+          </div>
+          <div className="text-xs text-muted-foreground">
+            AI产品经理工作台
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Nav */}
+      <ScrollArea className="flex-1 scrollbar-thin">
+        <nav className="space-y-1 px-3 py-4">
+          {navGroups.map((group) => {
+            const isExpanded = expandedGroups.has(group.title);
+            const hasActiveItem = group.items.some(
+              (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+            );
+            return (
+              <div key={group.title} className="mb-2">
+                <button
+                  onClick={() => toggleGroup(group.title)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    hasActiveItem
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <span className="flex h-4 w-4 items-center justify-center text-muted-foreground">
+                    {group.icon}
+                  </span>
+                  <span className="flex-1 text-left">{group.title}</span>
+                  {isExpanded ? (
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
+                </button>
+                {isExpanded && (
+                  <div className="mt-1 space-y-0.5 pl-3">
+                    {group.items.map((item) => {
+                      const isActive =
+                        pathname === item.href || pathname.startsWith(item.href + "/");
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={cn(
+                            "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all",
+                            isActive
+                              ? "bg-sidebar-active text-primary font-medium"
+                              : "text-muted-foreground hover:bg-sidebar-hover hover:text-foreground"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "shrink-0",
+                              isActive ? "text-primary" : "text-muted-foreground"
+                            )}
+                          >
+                            {item.icon}
+                          </span>
+                          <span className="flex-1 truncate">{item.title}</span>
+                          {item.badge && (
+                            <span
+                              className={cn(
+                                "rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+                                item.badge === "NEW"
+                                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                  : "bg-secondary text-secondary-foreground"
+                              )}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+
+      {/* Footer - Settings */}
+      <div className="border-t border-sidebar-border p-3">
+        <Link
+          href="/settings"
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all",
+            pathname === "/settings"
+              ? "bg-sidebar-active text-primary font-medium"
+              : "text-muted-foreground hover:bg-sidebar-hover hover:text-foreground"
+          )}
+        >
+          <Settings className="h-4 w-4 shrink-0" />
+          <span>设置</span>
+        </Link>
+      </div>
     </aside>
   );
 }

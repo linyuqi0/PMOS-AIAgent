@@ -4,6 +4,7 @@ export interface Project {
   description: string;
   tags: string[];
   status: 'active' | 'archived';
+  color?: string;
   createdAt: Date;
   updatedAt: Date;
 }

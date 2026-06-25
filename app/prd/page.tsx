@@ -258,7 +258,7 @@ ${html}
   }, [formData]);
 
   return (
-    <AppLayout title="PRD 生成器" subtitle="§ 03 — A Document in Nine Movements">
+    <AppLayout title="PRD 生成器" description="§ 03 — A Document in Nine Movements">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">

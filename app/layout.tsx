@@ -1,35 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { PWARegister } from "@/components/pwa-register";
 
-const fraunces = Fraunces({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  axes: ["opsz", "SOFT"],
-});
-
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-plex-sans",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-jetbrains",
-  weight: ["400", "500", "700"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "PMOS Lite — AI 产品经理工作台",
-  description:
-    "面向产品经理、运营、BI 分析师的本地化 AI 工具箱：PRD、SQL、埋点、用例、知识库、Prompt 库。",
+  title: "PMOS Lite - AI 产品经理工作台",
+  description: "面向产品经理、运营、BI分析师的本地化AI工具箱：PRD生成、SQL助手、埋点设计、测试用例、知识库、Prompt库。",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon.svg",
@@ -39,8 +23,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5EFE3" },
-    { media: "(prefers-color-scheme: dark)", color: "#14110F" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 };
 
@@ -50,15 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="zh-CN"
-      suppressHydrationWarning
-      className={`${fraunces.variable} ${plexSans.variable} ${jetbrains.variable}`}
-    >
-      <body className="font-sans">
+    <html lang="zh-CN" suppressHydrationWarning className={inter.variable}>
+      <body>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

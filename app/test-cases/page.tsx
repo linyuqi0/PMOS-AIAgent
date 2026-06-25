@@ -276,7 +276,7 @@ export default function TestCasesPage() {
   };
 
   return (
-    <AppLayout title="测试用例生成器" subtitle="§ 07 — Five Acts of Quality Assurance">
+    <AppLayout title="测试用例生成器" description="§ 07 — Five Acts of Quality Assurance">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-80 shrink-0 flex flex-col gap-4">
           <div className="flex items-center gap-2">
