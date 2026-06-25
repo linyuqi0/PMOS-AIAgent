@@ -8,4 +8,4 @@
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
- */let r=(0,t(8030).Z)("Plus",[["path",{d:"M5 12h14",key:"1ays0h"}],["path",{d:"M12 5v14",key:"s699le"}]])}},function(e){e.O(0,[542,509,199,971,23,744],function(){return e(e.s=2634)}),_N_E=e.O()}]);
+ */let r=(0,t(8030).Z)("Plus",[["path",{d:"M5 12h14",key:"1ays0h"}],["path",{d:"M12 5v14",key:"s699le"}]])}},function(e){e.O(0,[70,286,199,971,23,744],function(){return e(e.s=2634)}),_N_E=e.O()}]);
