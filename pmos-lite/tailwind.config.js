@@ -51,20 +51,16 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Morandi palette
-        morandi: {
-          sage: '#A8B5A0',
-          dust: '#C4B7A6',
-          rose: '#D4A5A5',
-          lavender: '#B8B8D1',
-          sky: '#A6C0D4',
-          sand: '#D9C9B0',
-          clay: '#B89F8E',
-          moss: '#7D8B6F',
-          slate: '#8B9DAE',
-          cream: '#F5F1EB',
-          charcoal: '#4A4A4A',
-        }
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          hover: "hsl(var(--sidebar-hover))",
+          active: "hsl(var(--sidebar-active))",
+          border: "hsl(var(--sidebar-border))",
+        },
+      },
+      boxShadow: {
+        'card': '0 1px 3px 0 rgb(0 0 0 / 0.04)',
+        'card-hover': '0 10px 25px -5px rgb(0 0 0 / 0.08)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -100,5 +96,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 }

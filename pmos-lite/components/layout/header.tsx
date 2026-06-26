@@ -10,35 +10,45 @@ import { useAppStore } from "@/store/app";
 
 interface HeaderProps {
   title?: string;
+  description?: string;
+  actions?: React.ReactNode;
 }
 
-export function Header({ title }: HeaderProps) {
-  const { toggleSidebar, sidebarCollapsed } = useAppStore();
+export function Header({ title, description, actions }: HeaderProps) {
+  const { toggleSidebar } = useAppStore();
 
   return (
-    <header className="sticky top-0 z-30 h-14 border-b bg-background/80 backdrop-blur-md">
-      <div className="flex h-full items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-md">
+      <div className="flex h-16 items-center justify-between px-6">
+        <div className="flex items-center gap-4 min-w-0">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9 shrink-0"
             onClick={toggleSidebar}
           >
             <Menu className="h-4 w-4" />
           </Button>
-          {title && (
-            <h1 className="text-lg font-semibold">{title}</h1>
-          )}
+          <div className="min-w-0">
+            {title && (
+              <h1 className="text-lg font-semibold truncate">{title}</h1>
+            )}
+            {description && (
+              <p className="text-xs text-muted-foreground truncate">
+                {description}
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
+          {actions}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder="搜索..."
-              className="w-64 pl-9"
+              className="w-64 pl-9 h-9"
             />
           </div>
 

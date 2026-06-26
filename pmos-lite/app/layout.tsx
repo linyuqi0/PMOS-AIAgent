@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { PWARegister } from "@/components/pwa-register";
+import { AppInitializer } from "@/components/app-initializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,8 +13,8 @@ export const metadata: Metadata = {
   description: "帮助产品经理、运营、BI分析师高效完成工作的AI工作台",
   manifest: "/manifest.json",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F1EB" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1d23" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
   icons: {
     icon: "/icons/icon.svg",
@@ -31,11 +32,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
           <ToastProvider>
+            <AppInitializer />
             <PWARegister />
             {children}
           </ToastProvider>
