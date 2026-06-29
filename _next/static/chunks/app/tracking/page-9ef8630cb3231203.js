@@ -18,4 +18,4 @@
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
- */let n=(0,s(8030).Z)("X",[["path",{d:"M18 6 6 18",key:"1bl5f8"}],["path",{d:"m6 6 12 12",key:"d8bk6v"}]])}},function(e){e.O(0,[70,424,377,39,971,23,744],function(){return e(e.s=3874)}),_N_E=e.O()}]);
+ */let n=(0,s(8030).Z)("X",[["path",{d:"M18 6 6 18",key:"1bl5f8"}],["path",{d:"m6 6 12 12",key:"d8bk6v"}]])}},function(e){e.O(0,[70,587,377,849,72,971,23,744],function(){return e(e.s=3874)}),_N_E=e.O()}]);
