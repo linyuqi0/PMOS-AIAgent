@@ -17,6 +17,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Briefcase,
+  Users,
+  Swords,
+  Heart,
+  TrendingUp,
+  Map,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +41,12 @@ const navItems: NavItem[] = [
   { title: "项目中心", href: "/projects", icon: <FolderKanban className="h-5 w-5" /> },
   { title: "PRD生成器", href: "/prd", icon: <FileText className="h-5 w-5" /> },
   { title: "需求分析器", href: "/analyzer", icon: <BarChart3 className="h-5 w-5" /> },
+  { title: "用户故事", href: "/user-stories", icon: <Users className="h-5 w-5" /> },
+  { title: "竞品分析", href: "/competitors", icon: <Swords className="h-5 w-5" /> },
+  { title: "KANO模型", href: "/kano", icon: <Heart className="h-5 w-5" /> },
+  { title: "优先级矩阵", href: "/priority", icon: <TrendingUp className="h-5 w-5" /> },
+  { title: "用户旅程", href: "/journey", icon: <Map className="h-5 w-5" /> },
+  { title: "ROI计算器", href: "/roi", icon: <Calculator className="h-5 w-5" /> },
   { title: "SQL助手", href: "/sql", icon: <Database className="h-5 w-5" /> },
   { title: "埋点设计器", href: "/tracking", icon: <Target className="h-5 w-5" /> },
   { title: "测试用例", href: "/test-cases", icon: <TestTube className="h-5 w-5" /> },

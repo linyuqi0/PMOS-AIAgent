@@ -16,6 +16,12 @@ import {
   Target,
   TestTube,
   BarChart3,
+  Users,
+  Swords,
+  Heart,
+  TrendingUp,
+  Map,
+  Calculator,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +56,12 @@ const typeIcons: Record<RecentEdit["type"], React.ReactNode> = {
   testcase: <TestTube className="h-4 w-4" />,
   knowledge: <BookOpen className="h-4 w-4" />,
   prompt: <Sparkles className="h-4 w-4" />,
+  userstory: <Users className="h-4 w-4" />,
+  competitor: <Swords className="h-4 w-4" />,
+  kano: <Heart className="h-4 w-4" />,
+  priority: <TrendingUp className="h-4 w-4" />,
+  journey: <Map className="h-4 w-4" />,
+  roi: <Calculator className="h-4 w-4" />,
 };
 
 const typeLabels: Record<RecentEdit["type"], string> = {
@@ -61,6 +73,12 @@ const typeLabels: Record<RecentEdit["type"], string> = {
   testcase: "测试用例",
   knowledge: "知识库",
   prompt: "Prompt",
+  userstory: "用户故事",
+  competitor: "竞品分析",
+  kano: "KANO模型",
+  priority: "优先级",
+  journey: "用户旅程",
+  roi: "ROI计算",
 };
 
 const typeHrefs: Record<RecentEdit["type"], string> = {
@@ -72,6 +90,12 @@ const typeHrefs: Record<RecentEdit["type"], string> = {
   testcase: "/test-cases",
   knowledge: "/knowledge",
   prompt: "/prompts",
+  userstory: "/user-stories",
+  competitor: "/competitors",
+  kano: "/kano",
+  priority: "/priority",
+  journey: "/journey",
+  roi: "/roi",
 };
 
 export default function DashboardPage() {

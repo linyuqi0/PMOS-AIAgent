@@ -9,6 +9,12 @@ import type {
   KnowledgeDoc,
   Prompt,
   RecentEdit,
+  UserStory,
+  Competitor,
+  KanoItem,
+  PriorityItem,
+  UserJourney,
+  RoiCalculation,
 } from '@/types';
 
 export class PMOSDatabase extends Dexie {
@@ -21,11 +27,17 @@ export class PMOSDatabase extends Dexie {
   knowledgeDocs!: Table<KnowledgeDoc, number>;
   prompts!: Table<Prompt, number>;
   recentEdits!: Table<RecentEdit, number>;
+  userStories!: Table<UserStory, number>;
+  competitors!: Table<Competitor, number>;
+  kanoItems!: Table<KanoItem, number>;
+  priorityItems!: Table<PriorityItem, number>;
+  userJourneys!: Table<UserJourney, number>;
+  roiCalculations!: Table<RoiCalculation, number>;
 
   constructor() {
     super('PMOSLiteDB');
 
-    this.version(1).stores({
+    this.version(2).stores({
       projects: '++id, name, status, createdAt, updatedAt, *tags',
       prds: '++id, projectId, title, createdAt, updatedAt',
       requirements: '++id, projectId, title, createdAt, updatedAt',
@@ -35,6 +47,12 @@ export class PMOSDatabase extends Dexie {
       knowledgeDocs: '++id, title, fileType, createdAt, updatedAt, *tags',
       prompts: '++id, title, category, isFavorite, createdAt, updatedAt, *tags',
       recentEdits: '++id, type, itemId, editedAt',
+      userStories: '++id, projectId, epic, priority, status, storyPoints, createdAt, updatedAt, *tags',
+      competitors: '++id, projectId, name, score, createdAt, updatedAt, *tags',
+      kanoItems: '++id, projectId, featureName, category, satisfaction, importance, createdAt, updatedAt, *tags',
+      priorityItems: '++id, projectId, name, riceScore, moscowCategory, value, complexity, createdAt, updatedAt, *tags',
+      userJourneys: '++id, projectId, persona, goal, createdAt, updatedAt, *tags',
+      roiCalculations: '++id, projectId, name, roi, paybackPeriod, createdAt, updatedAt, *tags',
     });
   }
 
@@ -71,7 +89,7 @@ export class PMOSDatabase extends Dexie {
   }
 
   async exportData(): Promise<string> {
-    const [projects, prds, requirements, sqlQueries, trackingEvents, testCases, knowledgeDocs, prompts] =
+    const [projects, prds, requirements, sqlQueries, trackingEvents, testCases, knowledgeDocs, prompts, userStories, competitors, kanoItems, priorityItems, userJourneys, roiCalculations] =
       await Promise.all([
         this.projects.toArray(),
         this.prds.toArray(),
@@ -81,11 +99,17 @@ export class PMOSDatabase extends Dexie {
         this.testCases.toArray(),
         this.knowledgeDocs.toArray(),
         this.prompts.toArray(),
+        this.userStories.toArray(),
+        this.competitors.toArray(),
+        this.kanoItems.toArray(),
+        this.priorityItems.toArray(),
+        this.userJourneys.toArray(),
+        this.roiCalculations.toArray(),
       ]);
 
     return JSON.stringify(
       {
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
         data: {
           projects,
@@ -96,6 +120,12 @@ export class PMOSDatabase extends Dexie {
           testCases,
           knowledgeDocs,
           prompts,
+          userStories,
+          competitors,
+          kanoItems,
+          priorityItems,
+          userJourneys,
+          roiCalculations,
         },
       },
       null,
@@ -133,6 +163,24 @@ export class PMOSDatabase extends Dexie {
       }
       if (data.prompts?.length) {
         await this.prompts.bulkPut(data.prompts.map(mapDates));
+      }
+      if (data.userStories?.length) {
+        await this.userStories.bulkPut(data.userStories.map(mapDates));
+      }
+      if (data.competitors?.length) {
+        await this.competitors.bulkPut(data.competitors.map(mapDates));
+      }
+      if (data.kanoItems?.length) {
+        await this.kanoItems.bulkPut(data.kanoItems.map(mapDates));
+      }
+      if (data.priorityItems?.length) {
+        await this.priorityItems.bulkPut(data.priorityItems.map(mapDates));
+      }
+      if (data.userJourneys?.length) {
+        await this.userJourneys.bulkPut(data.userJourneys.map(mapDates));
+      }
+      if (data.roiCalculations?.length) {
+        await this.roiCalculations.bulkPut(data.roiCalculations.map(mapDates));
       }
     });
   }
@@ -434,5 +482,388 @@ LIMIT 20;`,
       },
     ];
     await db.sqlQueries.bulkAdd(defaultSqls);
+  }
+
+  const userStoryCount = await db.userStories.count();
+  if (userStoryCount === 0) {
+    const defaultStories: Omit<UserStory, 'id'>[] = [
+      {
+        epic: '用户注册登录',
+        role: '新用户',
+        action: '通过手机号注册账号',
+        value: '快速开始使用产品',
+        acceptanceCriteria: '1. 输入手机号获取验证码\n2. 验证码60秒倒计时\n3. 注册成功自动登录',
+        storyPoints: 5,
+        priority: 'must',
+        status: 'done',
+        tags: ['核心流程', '用户体系'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        epic: '用户注册登录',
+        role: '已注册用户',
+        action: '使用密码登录系统',
+        value: '访问我的数据和功能',
+        acceptanceCriteria: '1. 支持手机号/邮箱登录\n2. 密码错误提示清晰\n3. 连续5次错误锁定15分钟',
+        storyPoints: 3,
+        priority: 'must',
+        status: 'done',
+        tags: ['核心流程', '用户体系'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        epic: '内容浏览',
+        role: '访客',
+        action: '浏览首页推荐内容',
+        value: '快速了解产品价值',
+        acceptanceCriteria: '1. 无需登录即可浏览\n2. 支持下拉刷新\n3. 内容卡片展示清晰',
+        storyPoints: 8,
+        priority: 'should',
+        status: 'doing',
+        tags: ['内容', '首页'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        epic: '内容浏览',
+        role: '注册用户',
+        action: '收藏感兴趣的内容',
+        value: '之后快速找到并查看',
+        acceptanceCriteria: '1. 点击星星图标收藏\n2. 个人中心查看收藏列表\n3. 支持取消收藏',
+        storyPoints: 2,
+        priority: 'could',
+        status: 'backlog',
+        tags: ['内容', '互动'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        epic: '数据分析',
+        role: '运营人员',
+        action: '查看用户行为数据报表',
+        value: '掌握产品运营状况',
+        acceptanceCriteria: '1. DAU/留存/转化率等核心指标\n2. 支持按日期筛选\n3. 支持导出Excel',
+        storyPoints: 13,
+        priority: 'should',
+        status: 'backlog',
+        tags: ['数据', '运营'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.userStories.bulkAdd(defaultStories);
+  }
+
+  const competitorCount = await db.competitors.count();
+  if (competitorCount === 0) {
+    const defaultCompetitors: Omit<Competitor, 'id'>[] = [
+      {
+        name: '产品A',
+        website: 'https://product-a.com',
+        positioning: '面向中小企业的一站式SaaS平台',
+        targetUsers: '10-50人规模的中小企业主、运营负责人',
+        coreFeatures: '项目管理、团队协作、数据分析、客户管理',
+        strengths: '功能全面、界面美观、价格亲民、用户基数大',
+        weaknesses: '定制化能力弱、高级功能需付费、响应速度慢',
+        pricing: '免费版 + 99元/人/月专业版',
+        score: 85,
+        tags: ['SaaS', '项目管理', '直接竞品'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '产品B',
+        website: 'https://product-b.com',
+        positioning: '专注于AI赋能的智能工作台',
+        targetUsers: '产品经理、运营、数据分析师',
+        coreFeatures: 'AI助手、数据分析、文档协作、需求管理',
+        strengths: 'AI能力强、数据洞察准确、用户体验好',
+        weaknesses: '价格较高、功能深度不足、生态不完善',
+        pricing: '299元/人/月起',
+        score: 78,
+        tags: ['AI', '智能工具', '间接竞品'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '产品C',
+        website: 'https://product-c.com',
+        positioning: '轻量级团队协作工具',
+        targetUsers: '创业团队、小型工作室',
+        coreFeatures: '任务管理、即时通讯、文件共享',
+        strengths: '简单易用、上手快、免费功能足够用',
+        weaknesses: '功能少、不适合复杂项目、数据导出难',
+        pricing: '免费版 + 49元/人/月',
+        score: 72,
+        tags: ['协作', '轻量级', '潜在竞品'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.competitors.bulkAdd(defaultCompetitors);
+  }
+
+  const kanoCount = await db.kanoItems.count();
+  if (kanoCount === 0) {
+    const defaultKanoItems: Omit<KanoItem, 'id'>[] = [
+      {
+        featureName: '用户登录注册',
+        category: 'basic',
+        description: '基础账号体系，用户登录注册功能',
+        positiveQuestion: '如果产品支持登录注册，你觉得？',
+        negativeQuestion: '如果产品不支持登录注册，你觉得？',
+        satisfaction: 2,
+        importance: 5,
+        tags: ['基础功能', '用户体系'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        featureName: '消息推送通知',
+        category: 'performance',
+        description: '重要事件的消息推送和通知提醒',
+        positiveQuestion: '如果有消息推送提醒，你觉得？',
+        negativeQuestion: '如果没有消息推送提醒，你觉得？',
+        satisfaction: 4,
+        importance: 4,
+        tags: ['通知', '用户体验'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        featureName: 'AI智能推荐',
+        category: 'excitement',
+        description: '基于用户行为的个性化内容推荐',
+        positiveQuestion: '如果有AI智能推荐功能，你觉得？',
+        negativeQuestion: '如果没有AI智能推荐功能，你觉得？',
+        satisfaction: 5,
+        importance: 2,
+        tags: ['AI', '推荐', '差异化'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        featureName: '主题皮肤切换',
+        category: 'indifferent',
+        description: '多种主题皮肤供用户选择切换',
+        positiveQuestion: '如果支持主题皮肤切换，你觉得？',
+        negativeQuestion: '如果不支持主题皮肤切换，你觉得？',
+        satisfaction: 2,
+        importance: 1,
+        tags: ['美化', '低优先级'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        featureName: '自动分享到社交平台',
+        category: 'reverse',
+        description: '自动将用户活动分享到社交媒体',
+        positiveQuestion: '如果自动分享到社交平台，你觉得？',
+        negativeQuestion: '如果不自动分享到社交平台，你觉得？',
+        satisfaction: 1,
+        importance: 1,
+        tags: ['反需求', '隐私'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.kanoItems.bulkAdd(defaultKanoItems);
+  }
+
+  const priorityCount = await db.priorityItems.count();
+  if (priorityCount === 0) {
+    const defaultPriorities: Omit<PriorityItem, 'id'>[] = [
+      {
+        name: '用户登录注册',
+        description: '基础账号体系建设',
+        reach: 10000,
+        impact: 5,
+        confidence: 0.95,
+        effort: 8,
+        riceScore: 5938,
+        moscowCategory: 'must',
+        value: 9,
+        complexity: 5,
+        tags: ['核心', 'P0'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '首页内容推荐',
+        description: '个性化首页内容推荐算法',
+        reach: 8000,
+        impact: 4,
+        confidence: 0.7,
+        effort: 13,
+        riceScore: 1723,
+        moscowCategory: 'should',
+        value: 8,
+        complexity: 8,
+        tags: ['推荐', 'AI'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '消息推送系统',
+        description: '多渠道消息推送和通知中心',
+        reach: 6000,
+        impact: 3,
+        confidence: 0.85,
+        effort: 5,
+        riceScore: 3060,
+        moscowCategory: 'should',
+        value: 7,
+        complexity: 4,
+        tags: ['通知', '触达'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '深色模式支持',
+        description: '深色主题模式切换',
+        reach: 2000,
+        impact: 2,
+        confidence: 0.9,
+        effort: 3,
+        riceScore: 1200,
+        moscowCategory: 'could',
+        value: 4,
+        complexity: 2,
+        tags: ['美化', '体验优化'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '3D交互动效',
+        description: '炫酷的3D交互动画效果',
+        reach: 500,
+        impact: 2,
+        confidence: 0.5,
+        effort: 21,
+        riceScore: 24,
+        moscowCategory: 'wont',
+        value: 3,
+        complexity: 10,
+        tags: ['炫技', '低ROI'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.priorityItems.bulkAdd(defaultPriorities);
+  }
+
+  const journeyCount = await db.userJourneys.count();
+  if (journeyCount === 0) {
+    const defaultJourneys: Omit<UserJourney, 'id'>[] = [
+      {
+        persona: '新注册用户 - 小王，28岁，互联网运营',
+        goal: '完成首次产品使用并体验核心价值',
+        stages: [
+          {
+            id: 's1',
+            name: '发现产品',
+            description: '通过朋友推荐或广告了解到产品',
+            touchpoint: '朋友圈/广告/应用商店',
+            emotion: 'neutral',
+            painPoints: '产品描述不清晰，不知道能解决什么问题',
+            opportunities: '优化应用商店介绍文案，突出核心价值',
+          },
+          {
+            id: 's2',
+            name: '注册账号',
+            description: '下载App并完成注册',
+            touchpoint: 'App注册页',
+            emotion: 'happy',
+            painPoints: '注册流程太长，需要填写太多信息',
+            opportunities: '支持一键登录，简化注册步骤',
+          },
+          {
+            id: 's3',
+            name: '新手引导',
+            description: '完成新手引导了解功能',
+            touchpoint: '新手引导页',
+            emotion: 'happy',
+            painPoints: '引导步骤太多，想直接跳过',
+            opportunities: '提供跳过选项，关键功能做气泡提示',
+          },
+          {
+            id: 's4',
+            name: '首次使用',
+            description: '第一次使用核心功能',
+            touchpoint: '首页/核心功能页',
+            emotion: 'neutral',
+            painPoints: '不知道从哪里开始，功能太多眼花缭乱',
+            opportunities: '提供任务式引导，帮助用户完成首个任务',
+          },
+          {
+            id: 's5',
+            name: '留存回访',
+            description: '第二天再次打开使用',
+            touchpoint: 'Push推送/短信',
+            emotion: 'sad',
+            painPoints: '用完即走，没有回访动力',
+            opportunities: '设计回访机制，如每日推荐、签到奖励等',
+          },
+        ],
+        tags: ['新用户', '核心流程', 'Aha时刻'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.userJourneys.bulkAdd(defaultJourneys);
+  }
+
+  const roiCount = await db.roiCalculations.count();
+  if (roiCount === 0) {
+    const defaultRois: Omit<RoiCalculation, 'id'>[] = [
+      {
+        name: '首页推荐算法优化',
+        description: '优化首页个性化推荐算法，提升用户停留时长',
+        developmentCost: 200000,
+        operationCost: 50000,
+        expectedRevenue: 500000,
+        timeSaved: 0,
+        userGrowth: 15,
+        period: 12,
+        roi: 100,
+        paybackPeriod: 6,
+        tags: ['算法', '推荐', '高ROI'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '客服机器人系统',
+        description: '引入AI客服机器人，降低人工客服成本',
+        developmentCost: 150000,
+        operationCost: 30000,
+        expectedRevenue: 0,
+        timeSaved: 40,
+        userGrowth: 0,
+        period: 12,
+        roi: 217,
+        paybackPeriod: 4,
+        tags: ['AI', '客服', '降本'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        name: '数据可视化大屏',
+        description: '建设数据可视化大屏，提升管理决策效率',
+        developmentCost: 300000,
+        operationCost: 20000,
+        expectedRevenue: 100000,
+        timeSaved: 20,
+        userGrowth: 0,
+        period: 12,
+        roi: -58,
+        paybackPeriod: -1,
+        tags: ['数据', '可视化', '低ROI'],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ];
+    await db.roiCalculations.bulkAdd(defaultRois);
   }
 }

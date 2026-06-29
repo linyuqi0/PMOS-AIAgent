@@ -110,8 +110,113 @@ export interface Prompt {
 
 export interface RecentEdit {
   id?: number;
-  type: 'project' | 'prd' | 'requirement' | 'sql' | 'tracking' | 'testcase' | 'knowledge' | 'prompt';
+  type: 'project' | 'prd' | 'requirement' | 'sql' | 'tracking' | 'testcase' | 'knowledge' | 'prompt' | 'userstory' | 'competitor' | 'kano' | 'priority' | 'journey' | 'roi';
   itemId: number;
   title: string;
   editedAt: Date;
+}
+
+export interface UserStory {
+  id?: number;
+  projectId?: number;
+  epic: string;
+  role: string;
+  action: string;
+  value: string;
+  acceptanceCriteria: string;
+  storyPoints: number;
+  priority: 'must' | 'should' | 'could' | 'wont';
+  status: 'backlog' | 'doing' | 'done';
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Competitor {
+  id?: number;
+  projectId?: number;
+  name: string;
+  website: string;
+  positioning: string;
+  targetUsers: string;
+  coreFeatures: string;
+  strengths: string;
+  weaknesses: string;
+  pricing: string;
+  score: number;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface KanoItem {
+  id?: number;
+  projectId?: number;
+  featureName: string;
+  category: 'basic' | 'performance' | 'excitement' | 'indifferent' | 'reverse';
+  description: string;
+  positiveQuestion: string;
+  negativeQuestion: string;
+  satisfaction: number;
+  importance: number;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PriorityItem {
+  id?: number;
+  projectId?: number;
+  name: string;
+  description: string;
+  reach: number;
+  impact: number;
+  confidence: number;
+  effort: number;
+  riceScore: number;
+  moscowCategory: 'must' | 'should' | 'could' | 'wont';
+  value: number;
+  complexity: number;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserJourney {
+  id?: number;
+  projectId?: number;
+  persona: string;
+  goal: string;
+  stages: JourneyStage[];
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface JourneyStage {
+  id: string;
+  name: string;
+  description: string;
+  touchpoint: string;
+  emotion: 'happy' | 'neutral' | 'sad';
+  painPoints: string;
+  opportunities: string;
+}
+
+export interface RoiCalculation {
+  id?: number;
+  projectId?: number;
+  name: string;
+  description: string;
+  developmentCost: number;
+  operationCost: number;
+  expectedRevenue: number;
+  timeSaved: number;
+  userGrowth: number;
+  period: number;
+  roi: number;
+  paybackPeriod: number;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
