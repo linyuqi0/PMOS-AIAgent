@@ -30,6 +30,8 @@ import { Select } from "@/components/ui/select";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateKanoItems } from "@/lib/ai-service";
 import type { KanoItem } from "@/types";
 
 const categoryMap: Record<KanoItem['category'], { label: string; color: string; icon: React.ReactNode }> = {
@@ -237,6 +239,23 @@ export default function KanoPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="shrink-0">
+          <AIGenerateBar
+            placeholder="输入功能列表（逗号或换行分隔），AI 自动进行 KANO 分类（基础/期望/兴奋/无差异/反向）..."
+            buttonLabel="AI 分类"
+            examples={["登录注册, 搜索, 个性化推荐, 暗黑模式", "支付, 评论, 分享, 数据导出"]}
+            multiline={true}
+            rows={4}
+            onGenerate={(input) => generateKanoItems(input)}
+            onGenerated={async (data, input) => {
+              if (Array.isArray(data) && data.length > 0) {
+                await Promise.all(data.map((k) => db.kanoItems.add(k)));
+                toast({ message: `已生成 ${data.length} 条 KANO 分析项`, type: "success" });
+              }
+            }}
+          />
+        </div>
 
         <div className="flex gap-6 flex-1 min-h-0">
           <div className="w-64 shrink-0 flex flex-col gap-4">

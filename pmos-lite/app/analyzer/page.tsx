@@ -30,6 +30,8 @@ import { Select } from "@/components/ui/select";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateRequirement } from "@/lib/ai-service";
 import type { Requirement } from "@/types";
 
 export default function AnalyzerPage() {
@@ -257,6 +259,24 @@ export default function AnalyzerPage() {
                   )}
                 </div>
               </div>
+
+              {isEditing && (
+                <div className="mb-4">
+                  <AIGenerateBar
+                    placeholder="输入需求描述，AI 自动生成需求拆解、风险分析、估时..."
+                    buttonLabel="AI 生成分析"
+                    examples={["用户登录功能升级", "商品搜索优化", "订单退款流程改造"]}
+                    onGenerate={(input) => generateRequirement(input)}
+                    onGenerated={(data, input) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...data,
+                        title: data.title || prev.title || input,
+                      }))
+                    }
+                  />
+                </div>
+              )}
 
               {isEditing && (
                 <div className="mb-4 space-y-2">

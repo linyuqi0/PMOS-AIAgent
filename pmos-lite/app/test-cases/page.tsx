@@ -31,6 +31,8 @@ import { db } from "@/lib/db";
 import { formatDate, downloadFile } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { TestCase } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateTestCases } from "@/lib/ai-service";
 
 const typeConfig: Record<TestCase["type"], { label: string; icon: any; color: string; bg: string }> = {
   normal: { label: "正常流程", icon: CheckCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-950" },
@@ -279,6 +281,16 @@ export default function TestCasesPage() {
     <AppLayout title="测试用例生成器">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-80 shrink-0 flex flex-col gap-4">
+          <AIGenerateBar
+            placeholder="输入功能描述，AI 批量生成测试用例（正常/异常/边界/权限/兼容）..."
+            buttonLabel="AI 生成用例"
+            examples={["用户登录功能", "购物车结算", "内容审核流程"]}
+            onGenerate={(input) => generateTestCases(input)}
+            onGenerated={async (data, _input) => {
+              await Promise.all(data.map((t: any) => db.testCases.add(t)));
+              toast({ message: `已生成 ${data.length} 条测试用例`, type: "success" });
+            }}
+          />
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

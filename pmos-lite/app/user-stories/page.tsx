@@ -32,6 +32,8 @@ import { db } from "@/lib/db";
 import { formatDate, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { UserStory } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateUserStories } from "@/lib/ai-service";
 
 const STORY_POINTS = [1, 2, 3, 5, 8, 13, 21];
 
@@ -333,7 +335,23 @@ export default function UserStoriesPage() {
           </ScrollArea>
         </div>
 
-        <div className="w-80 shrink-0 border rounded-xl p-4">
+        <div className="w-80 shrink-0 border rounded-xl p-4 flex flex-col">
+          <AIGenerateBar
+            placeholder="输入功能描述，AI 批量生成用户故事（标准句式 + 故事点 + 优先级）..."
+            buttonLabel="AI 生成故事"
+            examples={["用户注册登录", "购物车功能", "内容发布与审核"]}
+            onGenerate={(input) => generateUserStories(input)}
+            onGenerated={async (data) => {
+              await Promise.all(
+                data.map((s: Omit<UserStory, "id">) => db.userStories.add(s))
+              );
+              toast({
+                message: `已生成 ${data.length} 条用户故事`,
+                type: "success",
+              });
+            }}
+            className="mb-3"
+          />
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium">
               {selectedEpic === "all" ? "全部用户故事" : selectedEpic}
@@ -342,7 +360,7 @@ export default function UserStoriesPage() {
               {filteredStories.length} 个
             </Badge>
           </div>
-          <ScrollArea className="h-[calc(100%-2rem)]">
+          <ScrollArea className="flex-1 min-h-0">
             <div className="space-y-2 pr-1">
               {filteredStories.length === 0 ? (
                 <div className="py-12 text-center text-sm text-muted-foreground">

@@ -33,6 +33,8 @@ import { db } from "@/lib/db";
 import { formatDate, generateId } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { UserJourney, JourneyStage } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateUserJourney } from "@/lib/ai-service";
 
 const emotionMap = {
   happy: { label: "愉悦", icon: Smile, color: "text-green-500", bg: "bg-green-50 dark:bg-green-950/30" },
@@ -458,6 +460,21 @@ export default function JourneyPage() {
               </div>
 
               <div className="flex-1 overflow-hidden flex flex-col gap-4">
+                {isEditing && (
+                  <AIGenerateBar
+                    placeholder="输入用户画像/场景描述，AI 自动生成完整用户旅程地图（含阶段、触点、情绪、痛点、机会）..."
+                    buttonLabel="AI 生成旅程"
+                    examples={["新用户首次购买", "B 端管理员配置系统", "内容创作者发布作品"]}
+                    onGenerate={(input) => generateUserJourney(input)}
+                    onGenerated={(data, input) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...data,
+                        persona: data.persona || prev.persona || input,
+                      }))
+                    }
+                  />
+                )}
                 <Card className="shrink-0">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">

@@ -38,6 +38,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { db } from "@/lib/db";
 import { formatDate, downloadFile, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generatePRD } from "@/lib/ai-service";
 import type { PRD } from "@/types";
 
 const prdSections = [
@@ -380,15 +382,31 @@ ${html}
               </div>
 
               {isEditing && (
-                <div className="mb-4">
-                  <Label>需求描述</Label>
-                  <Textarea
-                    value={formData.description || ""}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="简要描述需求内容..."
-                    className="mt-1"
-                    rows={2}
+                <div className="mb-4 space-y-3">
+                  <AIGenerateBar
+                    placeholder="输入需求描述，AI 一键生成完整 PRD（背景、目标、用户故事、流程、功能设计等）..."
+                    buttonLabel="AI 生成 PRD"
+                    examples={["用户积分商城系统", "AI 智能客服功能", "会员订阅升级流程"]}
+                    onGenerate={(input) => generatePRD(input)}
+                    onGenerated={(data, input) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...data,
+                        title: data.title || prev.title || input,
+                        description: data.description || prev.description || input,
+                      }));
+                    }}
                   />
+                  <div>
+                    <Label>需求描述</Label>
+                    <Textarea
+                      value={formData.description || ""}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="简要描述需求内容..."
+                      className="mt-1"
+                      rows={2}
+                    />
+                  </div>
                 </div>
               )}
 

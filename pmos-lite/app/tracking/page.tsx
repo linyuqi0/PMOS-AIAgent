@@ -28,6 +28,8 @@ import { db } from "@/lib/db";
 import { formatDate, downloadFile } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { TrackingEvent, TrackingProperty } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateTrackingEvents } from "@/lib/ai-service";
 
 export default function TrackingPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -205,6 +207,16 @@ export default function TrackingPage() {
     <AppLayout title="埋点设计器">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-72 shrink-0 flex flex-col gap-4">
+          <AIGenerateBar
+            placeholder="输入功能描述，AI 自动生成埋点方案（事件名、属性、触发时机）..."
+            buttonLabel="AI 生成埋点"
+            examples={["商品详情页", "下单支付流程", "用户注册登录"]}
+            onGenerate={(input) => generateTrackingEvents(input)}
+            onGenerated={async (data, _input) => {
+              await Promise.all(data.map((t: any) => db.trackingEvents.add(t)));
+              toast({ message: `已生成 ${data.length} 条埋点事件`, type: "success" });
+            }}
+          />
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

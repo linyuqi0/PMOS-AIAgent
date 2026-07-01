@@ -12,16 +12,24 @@ import {
   Shield,
   HardDrive,
   RotateCcw,
+  Sparkles,
+  Save,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "next-themes";
 import { db } from "@/lib/db";
 import { useToast } from "@/components/ui/toast";
+import { getAIConfig, setAIConfig, isAIEnabled, type AIConfig } from "@/lib/ai-service";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -29,17 +37,88 @@ export default function SettingsPage() {
   const [dbStats, setDbStats] = React.useState<Record<string, number>>({});
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // AI 配置
+  const [aiConfig, setAiConfig] = React.useState<AIConfig>({
+    enabled: false,
+    apiKey: "",
+    baseUrl: "https://api.openai.com/v1",
+    model: "gpt-3.5-turbo",
+  });
+  const [showApiKey, setShowApiKey] = React.useState(false);
+  const [testing, setTesting] = React.useState(false);
+  const [testResult, setTestResult] = React.useState<"idle" | "success" | "error">("idle");
+
   React.useEffect(() => {
     loadDbStats();
+    setAiConfig(getAIConfig());
   }, []);
 
   const loadDbStats = async () => {
     const stats: Record<string, number> = {};
-    const tables = ["projects", "prds", "requirements", "sqlQueries", "trackingEvents", "testCases", "knowledgeDocs", "prompts"];
+    const tables = [
+      "projects", "prds", "requirements", "sqlQueries", "trackingEvents",
+      "testCases", "knowledgeDocs", "prompts", "userStories", "competitors",
+      "kanoItems", "priorityItems", "userJourneys", "roiCalculations",
+    ];
     for (const table of tables) {
       stats[table] = await (db as any)[table].count();
     }
     setDbStats(stats);
+  };
+
+  const handleSaveAIConfig = () => {
+    setAIConfig(aiConfig);
+    toast({
+      message: aiConfig.enabled ? "AI 配置已保存并启用" : "AI 配置已保存（未启用）",
+      type: "success",
+    });
+  };
+
+  const handleToggleAI = () => {
+    const newConfig = { ...aiConfig, enabled: !aiConfig.enabled };
+    setAiConfig(newConfig);
+    setAIConfig({ enabled: newConfig.enabled });
+    toast({
+      message: newConfig.enabled ? "AI 已启用" : "AI 已关闭，将使用模板模式",
+      type: "success",
+    });
+  };
+
+  const handleTestConnection = async () => {
+    if (!aiConfig.apiKey) {
+      toast({ message: "请先填写 API Key", type: "error" });
+      return;
+    }
+    setTesting(true);
+    setTestResult("idle");
+    try {
+      // 先临时保存配置，再测试
+      setAIConfig({ ...aiConfig, enabled: true });
+      const response = await fetch(`${aiConfig.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${aiConfig.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: aiConfig.model,
+          messages: [{ role: "user", content: "Hi" }],
+          max_tokens: 5,
+        }),
+      });
+      if (response.ok) {
+        setTestResult("success");
+        toast({ message: "连接测试成功", type: "success" });
+      } else {
+        setTestResult("error");
+        toast({ message: `连接失败：HTTP ${response.status}`, type: "error" });
+      }
+    } catch (e: any) {
+      setTestResult("error");
+      toast({ message: e?.message || "连接失败", type: "error" });
+    } finally {
+      setTesting(false);
+    }
   };
 
   const handleExport = async () => {
@@ -106,11 +185,120 @@ export default function SettingsPage() {
     testCases: "测试用例",
     knowledgeDocs: "知识库文档",
     prompts: "Prompt模板",
+    userStories: "用户故事",
+    competitors: "竞品分析",
+    kanoItems: "KANO模型",
+    priorityItems: "优先级",
+    userJourneys: "用户旅程",
+    roiCalculations: "ROI计算",
   };
 
   return (
     <AppLayout title="设置">
       <div className="max-w-3xl mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI 智能生成配置
+            </CardTitle>
+            <CardDescription>
+              配置 OpenAI 兼容 API，启用后所有工具支持 AI 一键生成。未配置时自动回退到模板模式。
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/30">
+              <div>
+                <p className="text-sm font-medium">启用 AI 生成</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  关闭后将使用内置模板生成内容
+                </p>
+              </div>
+              <Button
+                variant={aiConfig.enabled ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleAI}
+              >
+                {aiConfig.enabled ? "已启用" : "已关闭"}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="apiKey">API Key</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id="apiKey"
+                    type={showApiKey ? "text" : "password"}
+                    placeholder="sk-..."
+                    value={aiConfig.apiKey}
+                    onChange={(e) => setAiConfig({ ...aiConfig, apiKey: e.target.value })}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {testResult === "success" && (
+                  <CheckCircle2 className="h-5 w-5 text-green-500 self-center" />
+                )}
+                {testResult === "error" && (
+                  <AlertCircle className="h-5 w-5 text-red-500 self-center" />
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="baseUrl">API Base URL</Label>
+                <Input
+                  id="baseUrl"
+                  placeholder="https://api.openai.com/v1"
+                  value={aiConfig.baseUrl}
+                  onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="model">模型名称</Label>
+                <Input
+                  id="model"
+                  placeholder="gpt-3.5-turbo"
+                  value={aiConfig.model}
+                  onChange={(e) => setAiConfig({ ...aiConfig, model: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <Button onClick={handleSaveAIConfig} size="sm">
+                <Save className="mr-2 h-4 w-4" />
+                保存配置
+              </Button>
+              <Button
+                onClick={handleTestConnection}
+                variant="outline"
+                size="sm"
+                disabled={testing || !aiConfig.apiKey}
+              >
+                {testing ? "测试中..." : "测试连接"}
+              </Button>
+            </div>
+
+            <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">支持的兼容服务商：</p>
+              <p>• OpenAI: https://api.openai.com/v1</p>
+              <p>• DeepSeek: https://api.deepseek.com/v1</p>
+              <p>• 智谱 AI: https://open.bigmodel.cn/api/paas/v4</p>
+              <p>• 月之暗面: https://api.moonshot.cn/v1</p>
+              <p>• 其他 OpenAI 兼容接口均可配置</p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -169,7 +357,7 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
               {Object.entries(tableLabels).map(([key, label]) => (
                 <div key={key} className="rounded-lg border bg-card p-3 text-center">
                   <p className="text-2xl font-bold">{dbStats[key] || 0}</p>

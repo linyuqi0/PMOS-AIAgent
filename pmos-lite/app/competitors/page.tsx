@@ -27,6 +27,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateCompetitor } from "@/lib/ai-service";
 import type { Competitor } from "@/types";
 
 const getScoreColor = (score: number) => {
@@ -343,6 +345,24 @@ export default function CompetitorsPage() {
                   <p className="text-xs text-muted-foreground mt-2">
                     更新于 {formatDate(formData.updatedAt ?? new Date())}
                   </p>
+                </div>
+              )}
+
+              {isEditing && (
+                <div className="mb-4">
+                  <AIGenerateBar
+                    placeholder="输入产品/公司名，AI 自动生成竞品画像（定位、用户、功能、优劣势、定价）..."
+                    buttonLabel="AI 生成画像"
+                    examples={["Notion", "Figma", "飞书"]}
+                    onGenerate={(input) => generateCompetitor(input)}
+                    onGenerated={(data, input) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...data,
+                        name: data.name || prev.name || input,
+                      }))
+                    }
+                  />
                 </div>
               )}
 

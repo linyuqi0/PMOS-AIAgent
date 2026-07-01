@@ -29,6 +29,8 @@ import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { PriorityItem } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generatePriorityItems } from "@/lib/ai-service";
 
 const moscowMap: Record<PriorityItem["moscowCategory"], { label: string; color: string }> = {
   must: { label: "必须做", color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" },
@@ -191,6 +193,18 @@ export default function PriorityPage() {
     <AppLayout title="优先级矩阵">
       <div className="flex h-[calc(100vh-8rem)] gap-6">
         <div className="w-80 shrink-0 flex flex-col gap-4">
+          <AIGenerateBar
+            placeholder="输入功能列表（逗号或换行分隔），AI 自动 RICE 评分和 MoSCoW 分类..."
+            buttonLabel="AI 评分"
+            examples={["积分商城, 任务系统, 等级权益, 邀请奖励", "AI 推荐, 社交分享, 数据看板, 通知中心"]}
+            multiline={true}
+            rows={4}
+            onGenerate={(input) => generatePriorityItems(input)}
+            onGenerated={async (data, input) => {
+              await Promise.all(data.map((p: Omit<PriorityItem, "id">) => db.priorityItems.add(p)));
+              toast({ message: `已生成 ${data.length} 条优先级项`, type: "success" });
+            }}
+          />
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

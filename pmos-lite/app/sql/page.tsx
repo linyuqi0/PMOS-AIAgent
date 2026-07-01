@@ -10,7 +10,6 @@ import {
   Copy,
   Trash2,
   Save,
-  Sparkles,
   Wand2,
   ChevronRight,
 } from "lucide-react";
@@ -27,6 +26,8 @@ import { Select } from "@/components/ui/select";
 import { db } from "@/lib/db";
 import { formatDate, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { generateSQL } from "@/lib/ai-service";
+import { AIGenerateButton } from "@/components/ai-generate-bar";
 import type { SQLQuery } from "@/types";
 
 const dialects: { value: SQLQuery["dialect"]; label: string; color: string }[] = [
@@ -101,6 +102,7 @@ export default function SQLPage() {
   });
   const [tagInput, setTagInput] = React.useState("");
   const [nlInput, setNlInput] = React.useState("");
+  const [nlLoading, setNlLoading] = React.useState(false);
   const { toast } = useToast();
 
   const sqlQueries = useLiveQuery(
@@ -245,26 +247,38 @@ export default function SQLPage() {
     toast({ message: "SQL已格式化", type: "success" });
   };
 
-  const handleGenerateFromNL = () => {
+  const handleGenerateFromNL = async () => {
     if (!nlInput.trim()) {
       toast({ message: "请输入自然语言描述", type: "error" });
       return;
     }
 
     const dialect = formData.dialect || "mysql";
-    const nl = nlInput.toLowerCase();
-    
-    let generatedSql = "";
-    
-    if (nl.includes("统计") || nl.includes("数量") || nl.includes("count")) {
-      generatedSql = `SELECT
+    setNlLoading(true);
+
+    try {
+      const sql = await generateSQL(nlInput, dialect);
+
+      if (sql && sql.trim()) {
+        setFormData((prev) => ({ ...prev, sql }));
+        setActiveTab("editor");
+        toast({ message: "SQL已生成", type: "success" });
+        return;
+      }
+
+      // 兜底：generateSQL 返回空字符串时使用本地模板匹配
+      const nl = nlInput.toLowerCase();
+      let generatedSql = "";
+
+      if (nl.includes("统计") || nl.includes("数量") || nl.includes("count")) {
+        generatedSql = `SELECT
   COUNT(*) AS total_count
 FROM table_name
 WHERE 1=1
   AND created_at >= '2024-01-01'
   AND created_at < '2024-02-01';`;
-    } else if (nl.includes("分组") || nl.includes("group")) {
-      generatedSql = `SELECT
+      } else if (nl.includes("分组") || nl.includes("group")) {
+        generatedSql = `SELECT
   category,
   COUNT(*) AS cnt,
   SUM(amount) AS total_amount
@@ -273,8 +287,8 @@ WHERE status = 'active'
 GROUP BY category
 ORDER BY cnt DESC
 LIMIT 10;`;
-    } else if (nl.includes("用户") && nl.includes("留存")) {
-      generatedSql = `WITH first_day AS (
+      } else if (nl.includes("用户") && nl.includes("留存")) {
+        generatedSql = `WITH first_day AS (
   SELECT
     user_id,
     MIN(dt) AS first_dt
@@ -289,18 +303,71 @@ FROM first_day f
 LEFT JOIN user_events e ON f.user_id = e.user_id
 GROUP BY f.first_dt
 ORDER BY f.first_dt DESC;`;
-    } else {
-      generatedSql = `SELECT
+      } else {
+        generatedSql = `SELECT
   *
 FROM table_name
 WHERE 1=1
 ORDER BY created_at DESC
 LIMIT 100;`;
-    }
+      }
 
-    setFormData({ ...formData, sql: generatedSql });
-    setActiveTab("editor");
-    toast({ message: "SQL已生成", type: "success" });
+      setFormData((prev) => ({ ...prev, sql: generatedSql }));
+      setActiveTab("editor");
+      toast({ message: "SQL已生成", type: "success" });
+    } catch {
+      // 异常兜底：使用本地模板匹配
+      const nl = nlInput.toLowerCase();
+      let generatedSql = "";
+
+      if (nl.includes("统计") || nl.includes("数量") || nl.includes("count")) {
+        generatedSql = `SELECT
+  COUNT(*) AS total_count
+FROM table_name
+WHERE 1=1
+  AND created_at >= '2024-01-01'
+  AND created_at < '2024-02-01';`;
+      } else if (nl.includes("分组") || nl.includes("group")) {
+        generatedSql = `SELECT
+  category,
+  COUNT(*) AS cnt,
+  SUM(amount) AS total_amount
+FROM table_name
+WHERE status = 'active'
+GROUP BY category
+ORDER BY cnt DESC
+LIMIT 10;`;
+      } else if (nl.includes("用户") && nl.includes("留存")) {
+        generatedSql = `WITH first_day AS (
+  SELECT
+    user_id,
+    MIN(dt) AS first_dt
+  FROM user_events
+  GROUP BY user_id
+)
+SELECT
+  f.first_dt,
+  COUNT(DISTINCT f.user_id) AS new_users,
+  COUNT(DISTINCT CASE WHEN e.dt = f.first_dt + 1 THEN e.user_id END) AS day1_retention
+FROM first_day f
+LEFT JOIN user_events e ON f.user_id = e.user_id
+GROUP BY f.first_dt
+ORDER BY f.first_dt DESC;`;
+      } else {
+        generatedSql = `SELECT
+  *
+FROM table_name
+WHERE 1=1
+ORDER BY created_at DESC
+LIMIT 100;`;
+      }
+
+      setFormData((prev) => ({ ...prev, sql: generatedSql }));
+      setActiveTab("editor");
+      toast({ message: "SQL已生成（本地模板）", type: "success" });
+    } finally {
+      setNlLoading(false);
+    }
   };
 
   const handleAddTag = () => {
@@ -575,10 +642,12 @@ LIMIT 100;`;
                         rows={4}
                       />
                     </div>
-                    <Button onClick={handleGenerateFromNL} className="self-start">
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      生成SQL
-                    </Button>
+                    <AIGenerateButton
+                      onClick={handleGenerateFromNL}
+                      loading={nlLoading}
+                      label="生成SQL"
+                      className="self-start"
+                    />
                     {formData.sql && (
                       <div className="flex-1">
                         <Label>生成结果</Label>

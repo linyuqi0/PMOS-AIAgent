@@ -29,6 +29,8 @@ import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import type { RoiCalculation } from "@/types";
+import { AIGenerateBar } from "@/components/ai-generate-bar";
+import { generateROI } from "@/lib/ai-service";
 
 export default function RoiPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -340,6 +342,24 @@ export default function RoiPage() {
                   )}
                 </div>
               </div>
+
+              {isEditing && (
+                <div className="mb-4">
+                  <AIGenerateBar
+                    placeholder="输入项目描述，AI 自动估算开发成本、运营成本、预期收益并计算 ROI..."
+                    buttonLabel="AI 估算 ROI"
+                    examples={["搭建用户积分商城", "上线 AI 智能客服", "重构推荐算法"]}
+                    onGenerate={(input) => generateROI(input)}
+                    onGenerated={(data, input) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ...data,
+                        name: data.name || prev.name || `${input} - ROI分析`,
+                      }))
+                    }
+                  />
+                </div>
+              )}
 
               {isEditing && (
                 <div className="mb-4">
